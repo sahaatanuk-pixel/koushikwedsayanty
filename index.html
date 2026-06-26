@@ -366,17 +366,14 @@ footer::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;back
   <a href="#rsvp">RSVP</a>
 </nav>
 
-<!-- Hidden YouTube iframe -->
-<iframe id="yt-iframe"
-  src="https://www.youtube.com/embed/RpE-hVumiDI?autoplay=1&mute=1&loop=1&playlist=RpE-hVumiDI&controls=0&enablejsapi=1"
-  style="position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;border:none;pointer-events:none"
-  allow="autoplay; encrypted-media"
-  allowfullscreen>
-</iframe>
+<!-- Background Audio -->
+<audio id="bg-music" loop preload="auto"
+  src="https://www.dropbox.com/scl/fi/8c3yo7majs6nbo83np8hv/Dekhha-Tenu-Lyric-Video-Mr.-Mrs.-Mahi-Rajkummar-JanhviMohd.-FaizJaani.mp3?rlkey=yth0w9th4gbcosirreyixjlyk&st=b1z0cql7&raw=1">
+</audio>
 
 <!-- Music Button -->
 <div class="music-player">
-  <span class="music-label">🎵 Our Song</span>
+  <span class="music-label">🎵 Dekha Tenu</span>
   <button class="music-btn" id="musicBtn" title="Unmute music">🎵</button>
 </div>
 
@@ -717,13 +714,13 @@ footer::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;back
     <div class="contact-grid">
       <div class="contact-card">
         <div class="who">Groom's Family</div>
-        <div class="cname">Mr. Rajesh Sharma</div>
-        <div class="cnum">📞 +91 98765 43210</div>
+        <div class="cname">Mr. Nepal Saha</div>
+        <div class="cnum">📞 +91 8016898800</div>
       </div>
       <div class="contact-card">
         <div class="who">Bride's Family</div>
-        <div class="cname">Mr. Vikram Mehta</div>
-        <div class="cnum">📞 +91 98765 43211</div>
+        <div class="cname">Mrs. Srabani Biswas</div>
+        <div class="cnum">📞 +91 8159840094</div>
       </div>
     </div>
   </div>
@@ -732,9 +729,9 @@ footer::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;back
 <!-- ══════════════ FOOTER ══════════════ -->
 <footer>
   <div class="footer-floral">🌸 🪔 🌺 🪔 🌸</div>
-  <div class="footer-names">Arjun &amp; Priya</div>
-  <div class="footer-tag">14 February 2026 &nbsp;✦&nbsp; The Grand Leela Palace, Bengaluru</div>
-  <div class="footer-hashtag">#ArjunWedsPriya</div>
+  <div class="footer-names">Koushik &amp; Priya</div>
+  <div class="footer-tag">14 February 2026 &nbsp;✦&nbsp; S.B. Bhavan, Habra</div>
+  <div class="footer-hashtag">#KoushikWedsAyanty</div>
   <div class="footer-line">Made with ♥ for the most special day of our lives</div>
   <div class="footer-hearts" id="footer-hearts"></div>
 </footer>
@@ -920,12 +917,14 @@ function renderWish(name,msg){
   wall.prepend(card);
 }
 
-// ── YOUTUBE BACKGROUND MUSIC ──
+// ── BACKGROUND MUSIC (Dropbox) ──
+const audio = document.getElementById('bg-music');
 const musicBtn = document.getElementById('musicBtn');
 const nudge = document.getElementById('music-nudge');
-const iframe = document.getElementById('yt-iframe');
-let muted = true;
+let muted = false;
 let unlocked = false;
+
+audio.volume = 0.75;
 
 // Show nudge after loader
 setTimeout(() => {
@@ -933,24 +932,27 @@ setTimeout(() => {
   setTimeout(() => nudge.style.opacity = '0', 5000);
 }, 2800);
 
-// Use postMessage to control YouTube player
-function ytCmd(cmd) {
-  iframe.contentWindow.postMessage(JSON.stringify({
-    event: 'command', func: cmd, args: []
-  }), '*');
-}
-
-// Unmute on first interaction
-function unlock() {
-  if (unlocked) return;
+// Try autoplay immediately
+audio.play().then(() => {
   unlocked = true;
-  muted = false;
-  ytCmd('unMute');
   musicBtn.textContent = '🔇';
   musicBtn.style.background = 'var(--teal)';
   nudge.style.opacity = '0';
-}
+}).catch(() => {
+  // Blocked — unlock on first interaction
+  musicBtn.textContent = '🎵';
+  musicBtn.style.background = 'var(--red2)';
+});
 
+function unlock() {
+  if (unlocked) return;
+  unlocked = true;
+  audio.play().then(() => {
+    musicBtn.textContent = '🔇';
+    musicBtn.style.background = 'var(--teal)';
+    nudge.style.opacity = '0';
+  });
+}
 ['click','touchstart','scroll'].forEach(ev =>
   document.addEventListener(ev, unlock, { once: true, passive: true })
 );
@@ -960,7 +962,7 @@ musicBtn.addEventListener('click', function(e) {
   e.stopPropagation();
   if (!unlocked) { unlock(); return; }
   muted = !muted;
-  ytCmd(muted ? 'mute' : 'unMute');
+  audio.muted = muted;
   musicBtn.textContent = muted ? '🎵' : '🔇';
   musicBtn.style.background = muted ? 'var(--red2)' : 'var(--teal)';
 });
